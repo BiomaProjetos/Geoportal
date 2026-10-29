@@ -1,0 +1,54 @@
+# Geoportal Bioma — servidor completo: banco PostGIS, aplicação e HTTPS automático (Caddy)
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: geoportal
+      POSTGRES_USER: geoportal
+      POSTGRES_PASSWORD: ${DB_SENHA}
+    volumes:
+      - banco:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geoportal -d geoportal"]
+      interval: 10s
+      retries: 10
+
+  app:
+    build: ./app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://geoportal:${DB_SENHA}@db:5432/geoportal
+      SEGREDO_JWT: ${SEGREDO_JWT}
+      SESSAO_HORAS: ${SESSAO_HORAS:-12}
+      COOKIE_SEGURO: "1"
+      PASTA_DADOS: /dados
+      SEMA_WFS_URL: ${SEMA_WFS_URL:-}
+      SEMA_AUTHKEY: ${SEMA_AUTHKEY:-}
+      SEMA_TYPENAME_ATP: ${SEMA_TYPENAME_ATP:-Geoportal:MVW_REQUERIMENTO_ATP}
+      SEMA_CAMPO_CAR: ${SEMA_CAMPO_CAR:-NUMEROESTADUAL}
+    volumes:
+      - ./dados:/dados
+      - ./app/geoportal/camadas.yaml:/srv/geoportal/camadas.yaml:ro
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [app]
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMINIO: ${DOMINIO}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_dados:/data
+      - caddy_config:/config
+
+volumes:
+  banco:
+  caddy_dados:
+  caddy_config:

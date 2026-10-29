@@ -1,0 +1,4 @@
+# Garante finais de linha LF nos arquivos que rodam no Linux (CRLF quebra os scripts na VPS)
+* text=auto eol=lf
+*.png binary
+*.zip binary

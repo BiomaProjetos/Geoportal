@@ -1,0 +1,278 @@
+# Catálogo de camadas do Geoportal Bioma
+#
+# Cada camada de referência vira a tabela bases.<slug> quando é importada:
+#   geoportal importar-base <slug> <arquivo .shp/.zip/.gpkg>
+#
+# papel = como a camada entra na triagem:
+#   embargo          sobreposição = alerta crítico + serviço "Desembargo"
+#   desmate          PRODES: separa antes/depois do marco pelo campo de ano
+#   alerta           DETER, MapBiomas Alerta: alerta de atenção
+#   uso_consolidado  base de uso consolidado da SEMA-MT
+#   fitofisionomia   RADAM: define o percentual de Reserva Legal
+#   georref          SIGEF / SNCI: compara a área certificada com a do CAR
+#   outro_car        sobreposição com outro CAR
+#   custeio          glebas do Sicor (crédito rural)
+#   protegida        TI, UC, assentamento etc. (nivel: critico ou atencao)
+#   info             só aparece no mapa e na lista de sobreposições
+#
+# Os nomes de campo (campo_ano, campo_fito, campo_codigo...) variam de base para base.
+# Confira no QGIS (tabela de atributos) e ajuste aqui antes de importar.
+
+marco_legal: "2008-07-22"
+ano_prodes_pos_marco: 2009     # PRODES 2009 em diante = supressão depois de 22/07/2008
+
+percentual_rl:                 # regra pela fitofisionomia do RADAM (Amazônia Legal)
+  - contem: ["FLORESTA", "FLORESTAL"]
+    pct: 80
+    texto: "80% — floresta na Amazônia Legal"
+  - contem: ["CAMPINARANA", "CAMPOS GERAIS", "CAMPO"]
+    pct: 20
+    texto: "20% — campos gerais na Amazônia Legal"
+  - contem: ["SAVANA", "CERRADO"]
+    pct: 35
+    texto: "35% — cerrado na Amazônia Legal"
+
+# Como reconhecer, pelo nome do arquivo dentro do zip exportado do Simcar/Geoportal SEMA,
+# cada camada do próprio imóvel. A primeira regra que casar vale.
+imovel_tipos:
+  - tipo: ATP
+    nome: Perímetro do CAR
+    nomes_arquivo: ["ATP", "AREA_IMOVEL", "PERIMETRO", "REQUERIMENTO"]
+  - tipo: APP
+    nome: APP
+    nomes_arquivo: ["APP"]
+  - tipo: ARL
+    nome: Reserva Legal (ARL)
+    nomes_arquivo: ["ARL", "RESERVA"]
+  - tipo: AVN
+    nome: Vegetação nativa (AVN)
+    nomes_arquivo: ["AVN", "VEGETACAO"]
+  - tipo: AC
+    nome: Área consolidada declarada
+    nomes_arquivo: ["CONSOLIDADA", "_AC", "AREA_CONS"]
+  - tipo: AUAS
+    nome: AUAS
+    nomes_arquivo: ["AUAS"]
+  - tipo: HIDRO
+    nome: Hidrografia
+    nomes_arquivo: ["RIO", "HIDRO", "CURSO", "NASCENTE", "LAGOA", "MASSA"]
+
+fundos:                        # imagens de fundo do mapa
+  - nome: Sentinel-2 sem nuvens 2016 (EOX)
+    url: "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/{z}/{y}/{x}.jpg"
+    atribuicao: "Sentinel-2 cloudless 2016 por EOX IT Services GmbH (dados Copernicus 2016), CC BY 4.0"
+    max_zoom: 16
+  - nome: OpenStreetMap
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+    atribuicao: "© colaboradores do OpenStreetMap"
+    max_zoom: 19
+
+camadas:
+  # ---------- Embargos e autuações ----------
+  - slug: embargo_sema
+    nome: Embargos SEMA-MT
+    grupo: Embargos e alertas
+    fonte: SEMA-MT (Geoportal)
+    papel: embargo
+    orgao: SEMA-MT
+    cor: "#ff2d55"
+    tracejado: "7 5"
+  - slug: embargo_siga
+    nome: Área embargada SIGA
+    grupo: Embargos e alertas
+    fonte: SEMA-MT (Geoportal)
+    papel: embargo
+    orgao: SEMA-MT (SIGA)
+    cor: "#e8184a"
+    tracejado: "7 5"
+  - slug: embargo_ibama
+    nome: Embargos IBAMA
+    grupo: Embargos e alertas
+    fonte: IBAMA (dados abertos)
+    papel: embargo
+    orgao: IBAMA
+    cor: "#ff5c5c"
+    tracejado: "7 5"
+  - slug: embargo_icmbio
+    nome: Embargos ICMBio
+    grupo: Embargos e alertas
+    fonte: ICMBio (dados abertos)
+    papel: embargo
+    orgao: ICMBio
+    cor: "#ff7a45"
+    tracejado: "7 5"
+  - slug: auto_infracao_sema
+    nome: Autos de infração SEMA
+    grupo: Embargos e alertas
+    fonte: SEMA-MT (Geoportal)
+    papel: info
+    cor: "#ffa8a8"
+  - slug: mapbiomas_alerta
+    nome: Alertas MapBiomas
+    grupo: Embargos e alertas
+    fonte: MapBiomas Alerta
+    papel: alerta
+    cor: "#ffd23f"
+    tracejado: "2 4"
+    min_zoom: 10
+
+  # ---------- Desmatamento ----------
+  - slug: prodes
+    nome: PRODES (Amazônia e Cerrado)
+    grupo: Desmatamento (INPE)
+    fonte: INPE / TerraBrasilis
+    papel: desmate
+    campo_ano: year            # PRODES usa "year"; ajuste se a sua base usar outro nome
+    cor: "#ff4d4d"
+    min_zoom: 11
+  - slug: deter
+    nome: DETER
+    grupo: Desmatamento (INPE)
+    fonte: INPE / TerraBrasilis
+    papel: alerta
+    cor: "#ff9f1c"
+    min_zoom: 10
+
+  # ---------- Base de referência SEMA ----------
+  - slug: uso_consolidado
+    nome: Uso consolidado (base SEMA-MT)
+    grupo: Base de referência
+    fonte: SEMA-MT (Geoportal)
+    papel: uso_consolidado
+    cor: "#f2c94c"
+    tracejado: "4 3"
+    min_zoom: 11
+  - slug: radam
+    nome: RADAM Brasil
+    grupo: Base de referência
+    fonte: SEMA-MT / IBGE
+    papel: fitofisionomia
+    campo_fito: FITOECOLOG
+    cor: "#7bc47f"
+    min_zoom: 9
+    visivel: false
+  - slug: arl_lau
+    nome: ARL averbada LAU
+    grupo: Base de referência
+    fonte: SEMA-MT (Geoportal)
+    papel: info
+    cor: "#2e8b57"
+  - slug: autorizacao_desmate
+    nome: Autorizações de desmate
+    grupo: Base de referência
+    fonte: SEMA-MT (Geoportal)
+    papel: info
+    cor: "#9ad0ec"
+
+  # ---------- Áreas protegidas ----------
+  - slug: terra_indigena
+    nome: Terras Indígenas
+    grupo: Áreas protegidas
+    fonte: SEMA-MT / FUNAI
+    papel: protegida
+    nivel: critico
+    cor: "#d35400"
+  - slug: ti_entorno
+    nome: Entorno de TI (10 km)
+    grupo: Áreas protegidas
+    fonte: SEMA-MT (Geoportal)
+    papel: protegida
+    nivel: atencao
+    cor: "#ff9f43"
+    tracejado: "10 6"
+  - slug: unidade_conservacao
+    nome: Unidades de Conservação
+    grupo: Áreas protegidas
+    fonte: SEMA-MT / ICMBio
+    papel: protegida
+    nivel: critico
+    cor: "#16a085"
+  - slug: uc_amortecimento
+    nome: UC — zona de amortecimento
+    grupo: Áreas protegidas
+    fonte: SEMA-MT (Geoportal)
+    papel: protegida
+    nivel: atencao
+    cor: "#48c9b0"
+    tracejado: "10 6"
+  - slug: assentamento
+    nome: Assentamentos (INCRA / INTERMAT)
+    grupo: Áreas protegidas
+    fonte: INCRA / INTERMAT
+    papel: protegida
+    nivel: atencao
+    cor: "#a569bd"
+  - slug: quilombola
+    nome: Territórios quilombolas
+    grupo: Áreas protegidas
+    fonte: INCRA
+    papel: protegida
+    nivel: critico
+    cor: "#884ea0"
+  - slug: floresta_publica
+    nome: Florestas públicas (CNFP)
+    grupo: Áreas protegidas
+    fonte: Serviço Florestal Brasileiro
+    papel: protegida
+    nivel: atencao
+    cor: "#1e8449"
+
+  # ---------- Fundiário ----------
+  - slug: sigef
+    nome: SIGEF
+    grupo: Fundiário (INCRA)
+    fonte: INCRA (acervo fundiário)
+    papel: georref
+    rotulo: SIGEF
+    campo_codigo: parcela_co
+    cor: "#ffe066"
+    tracejado: "8 6"
+    preenchimento: false
+    min_zoom: 11
+  - slug: snci
+    nome: SNCI
+    grupo: Fundiário (INCRA)
+    fonte: INCRA (acervo fundiário)
+    papel: georref
+    rotulo: SNCI
+    campo_codigo: num_certif
+    cor: "#ffb3e6"
+    tracejado: "8 6"
+    preenchimento: false
+    min_zoom: 11
+
+  # ---------- CAR de terceiros ----------
+  - slug: car_estadual
+    nome: CAR estadual (outros imóveis)
+    grupo: CAR
+    fonte: SEMA-MT (Simcar)
+    papel: outro_car
+    campo_codigo: NUMEROESTADUAL
+    cor: "#ffffff"
+    tracejado: "5 5"
+    min_zoom: 12
+  - slug: sicar_federal
+    nome: SICAR federal
+    grupo: CAR
+    fonte: Serviço Florestal Brasileiro
+    papel: outro_car
+    campo_codigo: cod_imovel
+    cor: "#dfe6e9"
+    tracejado: "3 5"
+    min_zoom: 12
+    visivel: false
+
+  # ---------- Crédito rural ----------
+  - slug: sicor_glebas
+    nome: Glebas de custeio (Sicor)
+    grupo: Crédito rural (BCB)
+    fonte: Banco Central (microdados do Sicor)
+    papel: custeio
+    campos_custeio:            # ajuste para os nomes do arquivo que você baixar
+      ano: ANO_SAFRA
+      instituicao: INSTITUICAO
+      finalidade: FINALIDADE
+      cultura: PRODUTO
+      valor: VALOR
+    cor: "#b48cff"
+    min_zoom: 11

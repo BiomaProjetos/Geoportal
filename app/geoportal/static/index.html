@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a2616">
+<title>Geoportal Bioma</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icone.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icone-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="logo">
+      <img src="/icone.svg" width="38" height="38" alt="">
+      <div><b>RADAR <span>BIOMA</span></b><small>Geoportal</small></div>
+    </div>
+    <nav class="nav" aria-label="Seções">
+      <a href="#geoportal" data-view="geoportal" class="on"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3z"/><path d="M9 3v15M15 6v15"/></svg>Geoportal</a>
+      <a href="#carteira" data-view="carteira"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 6h11M10 12h11M10 18h11M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18h4"/></svg>CARs<span class="badge" id="navCount">0</span></a>
+      <a href="#equipe" data-view="equipe" id="navEquipe" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2.5.6 4 2.8 4 6"/></svg>Equipe</a>
+    </nav>
+    <div class="side-foot"><div class="avatar" id="avatar">·</div><div style="min-width:0"><b id="userNome">—</b><small id="userPerfil"></small></div>
+      <button class="xbtn" id="btnSair" title="Sair" aria-label="Sair" style="margin-left:auto;color:var(--side-muted)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg></button></div>
+  </aside>
+
+  <main class="main">
+    <section class="view" id="v-geoportal">
+      <div class="geo" id="geo" data-m="map">
+        <div class="pane layers" aria-label="Camadas">
+          <div class="pane-title"><h2>Camadas</h2></div>
+          <label class="lsearch"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="layerFilter" placeholder="Buscar camadas…" aria-label="Buscar camadas"></label>
+          <div id="tree"></div>
+          <p class="layer-note">Camadas de referência aparecem a partir de certo nível de aproximação, para o mapa continuar rápido.</p>
+        </div>
+
+        <div class="mapwrap">
+          <div class="searchbar">
+            <form class="sbox" id="searchForm" autocomplete="off">
+              <input id="searchInput" list="carList" placeholder="Número do CAR, ex.: MT100245/2023" aria-label="Número do CAR" style="padding-left:14px">
+              <datalist id="carList"></datalist>
+              <button type="submit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Analisar</button>
+            </form>
+            <button class="ghostbtn" id="btnNovoMapa" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Importar CAR</button>
+          </div>
+          <div id="map" role="region" aria-label="Mapa"></div>
+          <button class="mapbtn" id="btnGps" type="button" title="Minha posição" aria-label="Mostrar minha posição"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+          <select class="fundo-sel" id="fundoSel" aria-label="Imagem de fundo"></select>
+          <div class="aviso-mapa" id="avisoMapa" hidden></div>
+          <div class="status"><span id="coord" class="mono">—</span><span>SIRGAS 2000 · EPSG:4674</span><span id="atrib"></span></div>
+        </div>
+
+        <div class="pane analysis" aria-label="Análise do imóvel">
+          <div id="aHead" class="a-head"></div>
+          <div class="tabs" id="tabs" role="tablist"></div>
+          <div class="a-body" id="aBody"></div>
+        </div>
+      </div>
+    </section>
+
+    <nav class="mobtabs" id="mobtabs" aria-label="Painéis do geoportal">
+      <button type="button" data-m="map" class="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3z"/><path d="M9 3v15M15 6v15"/></svg>Mapa</button>
+      <button type="button" data-m="analysis"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg>Análise<span class="mdot" id="mdot"></span></button>
+      <button type="button" data-m="layers"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>Camadas</button>
+    </nav>
+
+    <section class="view" id="v-carteira" hidden>
+      <div class="cart"><div class="cart-inner">
+        <div class="c-head">
+          <div><h1>Carteira de CARs</h1><p>SIMCARs da Bioma e imóveis em prospecção, com o resultado da triagem.</p></div>
+          <div class="acts"><button class="btn primary" type="button" id="btnNovo"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Importar CAR</button></div>
+        </div>
+        <div class="kpis" id="kpis"></div>
+        <div class="filters">
+          <label class="lsearch"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="cartSearch" placeholder="Buscar por CAR, imóvel, município ou proprietário" aria-label="Buscar na carteira"></label>
+          <div class="seg" id="cartSeg"><button class="on" data-f="all" type="button">Todos</button><button data-f="Carteira Bioma" type="button">Carteira Bioma</button><button data-f="Prospecção" type="button">Prospecção</button></div>
+        </div>
+        <div class="tcard"><div class="tbl-wrap"><table class="t" id="cartTable"></table></div></div>
+      </div></div>
+    </section>
+
+    <section class="view" id="v-equipe" hidden>
+      <div class="cart"><div class="cart-inner">
+        <div class="c-head"><div><h1>Equipe</h1><p>Quem pode entrar no geoportal.</p></div></div>
+        <form class="card" id="formUsuario" style="display:flex;flex-direction:column;gap:12px">
+          <h5 style="margin:0">Adicionar pessoa</h5>
+          <div class="grid2">
+            <label class="fld">Nome<input id="uNome" required></label>
+            <label class="fld">E-mail<input id="uEmail" type="email" required></label>
+            <label class="fld">Senha inicial<input id="uSenha" type="password" minlength="10" required><small>Mínimo de 10 caracteres.</small></label>
+            <label class="fld">Perfil<select id="uPerfil"><option value="analista">Analista</option><option value="admin">Administrador</option></select></label>
+          </div>
+          <div><button class="btn primary" type="submit">Salvar pessoa</button> <span class="erro" id="uErro"></span></div>
+        </form>
+        <div class="tcard"><div class="tbl-wrap"><table class="t lst-us" id="tabUsuarios"></table></div></div>
+      </div></div>
+    </section>
+  </main>
+</div>
+
+<dialog class="modal" id="dlgNovo">
+  <form method="dialog" id="formNovo">
+    <div class="modal-h"><h3>Importar CAR</h3><button class="xbtn" value="cancel" formnovalidate aria-label="Fechar">×</button></div>
+    <div class="modal-b">
+      <label class="drop" id="drop" for="fArquivo"><b>Escolha o .zip exportado do Geoportal SEMA</b><br>ou um KML/KMZ do perímetro. Pode arrastar o arquivo para cá.<br><span id="fNomeArq"></span></label>
+      <input type="file" id="fArquivo" accept=".zip,.kml,.kmz,.geojson,.json,.gpkg" hidden>
+      <div class="grid2">
+        <label class="fld">Número do CAR<input id="fCar" placeholder="Se não vier no arquivo"></label>
+        <label class="fld">Origem<select id="fOrigem"><option>Prospecção</option><option>Carteira Bioma</option></select></label>
+        <label class="fld">Nome do imóvel<input id="fNome"></label>
+        <label class="fld">Município<input id="fMun"></label>
+        <label class="fld">Proprietário<input id="fProp"></label>
+        <label class="fld">Analista<input id="fAnalista"></label>
+      </div>
+      <span class="erro" id="fErro"></span>
+    </div>
+    <div class="modal-f"><button class="btn" value="cancel" formnovalidate>Cancelar</button><button class="btn primary" id="fEnviar" value="default">Importar e triar</button></div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/vendor/leaflet/leaflet.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
